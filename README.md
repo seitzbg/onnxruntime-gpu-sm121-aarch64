@@ -56,6 +56,13 @@ only gap in an otherwise complete CUDA 13 stack on this hardware.
 
 ## Build gotcha — an arch list of only 120/121 silently produces a broken .so
 
+> **Fixed upstream, but not yet in any release.** ONNX Runtime commit
+> [`ed98916`](https://github.com/microsoft/onnxruntime/commit/ed9891635) (PR
+> [#29824](https://github.com/microsoft/onnxruntime/pull/29824), 2026-07-24) makes
+> `EXCLUDE_SM120_REAL` apply only on MSVC, so Linux builds keep the SM120 archs. The
+> problem below affects **v1.27.1 and earlier** — i.e. every released version at time of
+> writing. It is why these wheels are built with `90;120;121`.
+
 If you build this yourself, **your arch list must include an architecture in `[75, 120)`**.
 Building for only Blackwell (`121`, or `120;121`) yields a wheel that compiles and installs
 cleanly but whose CUDA provider cannot load:
@@ -82,6 +89,9 @@ The chain, in ONNX Runtime 1.27.1:
    fails at `dlopen`.
 
 Adding `90` keeps that object library alive. These wheels are built with `90;120;121`.
+
+On current `main` this is resolved differently — the filter no longer excludes SM120 real
+archs on non-MSVC toolchains, so `120;121` alone would work once that ships in a release.
 
 ## Build provenance
 
